@@ -2,6 +2,7 @@ use cfg_if::cfg_if;
 use leptos::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use uuid::Uuid;
 
 cfg_if! {
 if #[cfg(feature = "ssr")] {
@@ -14,7 +15,7 @@ if #[cfg(feature = "ssr")] {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct User {
-    pub id: i64,
+    pub id: Uuid,
     pub username: String,
     pub password: String,
     pub permissions: HashSet<String>,
@@ -25,7 +26,7 @@ impl Default for User {
         let permissions = HashSet::new();
 
         Self {
-            id: -1,
+            id: Uuid::new_v4(),
             username: "Guest".into(),
             password: "".into(),
             permissions,
@@ -36,11 +37,12 @@ impl Default for User {
 cfg_if! {
 if #[cfg(feature = "ssr")] {
     use async_trait::async_trait;
-
+        // use uuid::Uuid;
+    
     impl User {
-        pub async fn get(id: i64, pool: &SqlitePool) -> Option<Self> {
+        pub async fn get(id: Uuid, pool: &SqlitePool) -> Option<Self> {
             let sqluser = sqlx::query_as::<_, SqlUser>("SELECT * FROM users WHERE id = ?")
-                .bind(id)
+                .bind(id.to_string())
                 .fetch_one(pool)
                 .await
                 .ok()?;
@@ -49,7 +51,7 @@ if #[cfg(feature = "ssr")] {
             let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
                 "SELECT token FROM user_permissions WHERE user_id = ?;",
             )
-            .bind(id)
+            .bind(id.to_string())
             .fetch_all(pool)
             .await
             .ok()?;
@@ -63,19 +65,22 @@ if #[cfg(feature = "ssr")] {
                 .fetch_one(pool)
                 .await
                 .ok()?;
-
+        
             //lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
             let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
                 "SELECT token FROM user_permissions WHERE user_id = ?;",
             )
-            .bind(sqluser.id)
+            // .bind(sqluser.id) // If sqluser.id is a String
+            .bind(sqluser.id.to_string()) // If sqluser.id is a Uuid
             .fetch_all(pool)
             .await
             .ok()?;
-
+        
             Some(sqluser.into_user(Some(sql_user_perms)))
         }
     }
+    
+
 
     #[derive(sqlx::FromRow, Clone)]
     pub struct SqlPermissionTokens {
@@ -84,7 +89,7 @@ if #[cfg(feature = "ssr")] {
 
     #[async_trait]
     impl Authentication<User, i64, SqlitePool> for User {
-        async fn load_user(userid: i64, pool: Option<&SqlitePool>) -> Result<User, anyhow::Error> {
+        async fn load_user(userid: Uuid, pool: Option<&SqlitePool>) -> Result<User, anyhow::Error> {
             let pool = pool.unwrap();
 
             User::get(userid, pool)
@@ -114,15 +119,15 @@ if #[cfg(feature = "ssr")] {
 
     #[derive(sqlx::FromRow, Clone)]
     pub struct SqlUser {
-        pub id: i64,
+        pub id: String,
         pub username: String,
         pub password: String,
     }
-
+    
     impl SqlUser {
         pub fn into_user(self, sql_user_perms: Option<Vec<SqlPermissionTokens>>) -> User {
             User {
-                id: self.id,
+                id: Uuid::parse_str(&self.id).expect("Failed to parse UUID"),
                 username: self.username,
                 password: self.password,
                 permissions: if let Some(user_perms) = sql_user_perms {
@@ -138,6 +143,7 @@ if #[cfg(feature = "ssr")] {
     }
 }
 }
+
 
 #[server(Foo, "/api")]
 pub async fn foo() -> Result<String, ServerFnError> {

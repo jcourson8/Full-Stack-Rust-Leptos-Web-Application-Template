@@ -4,10 +4,11 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Todo {
-    id: u32,
+    id: Uuid,
     user: Option<User>,
     title: String,
     created_at: String,
@@ -31,8 +32,8 @@ if #[cfg(feature = "ssr")] {
 
     #[derive(sqlx::FromRow, Clone)]
     pub struct SqlTodo {
-        id: u32,
-        user_id: i64,
+        id: String,
+        user_id: String,
         title: String,
         created_at: String,
         completed: bool,
@@ -41,8 +42,10 @@ if #[cfg(feature = "ssr")] {
     impl SqlTodo {
         pub async fn into_todo(self, pool: &SqlitePool) -> Todo {
             Todo {
-                id: self.id,
-                user: User::get(self.user_id, pool).await,
+                // id: self.id,
+                // user: User::get(self.user_id, pool).await,
+                id: Uuid::parse_str(&self.id).expect("Failed to parse UUID"),
+                user: User::get(Uuid::parse_str(&self.user_id).expect("Failed to parse UUID"), pool).await,
                 title: self.title,
                 created_at: self.created_at,
                 completed: self.completed,
@@ -86,9 +89,11 @@ pub async fn add_todo(cx: Scope, title: String) -> Result<(), ServerFnError> {
     let user = get_user(cx).await?;
     let pool = pool(cx)?;
 
+
+
     let id = match user {
         Some(user) => user.id,
-        None => -1,
+        None => Uuid::new(),
     };
 
     // fake API delay
@@ -98,7 +103,7 @@ pub async fn add_todo(cx: Scope, title: String) -> Result<(), ServerFnError> {
         "INSERT INTO todos (title, user_id, completed) VALUES (?, ?, false)",
     )
     .bind(title)
-    .bind(id)
+    .bind(id.to_string())
     .execute(&pool)
     .await
     {
@@ -108,11 +113,11 @@ pub async fn add_todo(cx: Scope, title: String) -> Result<(), ServerFnError> {
 }
 
 #[server(DeleteTodo, "/api")]
-pub async fn delete_todo(cx: Scope, id: u16) -> Result<(), ServerFnError> {
+pub async fn delete_todo(cx: Scope, id: Uuid) -> Result<(), ServerFnError> {
     let pool = pool(cx)?;
 
     Ok(sqlx::query("DELETE FROM todos WHERE id = $1")
-        .bind(id)
+        .bind(id.to_string())
         .execute(&pool)
         .await
         .map(|_| ())?)
@@ -161,7 +166,7 @@ pub fn TodoApp(cx: Scope) -> impl IntoView {
                         }.into_view(cx),
                         Ok(Some(user)) => view! {cx,
                             <A href="/settings">"Settings"</A>", "
-                            <span>{format!("Logged in as: {} ({})", user.username, user.id)}</span>
+                            <span>{format!("Logged in as: {} ({})", user.username, user.id.to_string())}</span>
                         }.into_view(cx)
                     })
                 }}
@@ -241,7 +246,7 @@ pub fn Todos(cx: Scope) -> impl IntoView {
                                                                     todo.user.unwrap_or_default().username
                                                                 }
                                                                 <ActionForm action=delete_todo>
-                                                                    <input type="hidden" name="id" value={todo.id}/>
+                                                                    <input type="hidden" name="id" value={todo.id.to_string()}/>
                                                                     <input type="submit" value="X"/>
                                                                 </ActionForm>
                                                             </li>

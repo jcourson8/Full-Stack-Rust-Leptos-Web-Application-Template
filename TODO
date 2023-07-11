@@ -1,0 +1,28 @@
+// 1. need to hand error if cannot parse from database rather than "expect"
+impl SqlTodo {
+        pub async fn into_todo(self, pool: &SqlitePool) -> Todo {
+
+
+impl SqlUser {
+    pub fn into_user(self, sql_user_perms: Option<Vec<SqlPermissionTokens>>) -> User {
+        User {
+            id: Uuid::parse_str(&self.id).expect("Failed to parse UUID"),
+
+// -----
+
+// 2.  i dont like the None is -1 since there should always be Some user id. -1 is not the defualt uuid now
+#[server(AddTodo, "/api")]
+pub async fn add_todo(cx: Scope, title: String) -> Result<(), ServerFnError> {
+    let user = get_user(cx).await?;
+    let pool = pool(cx)?;
+
+
+    
+    let id = match user {
+        Some(user) => user.id,
+        None => Uuid::new(),
+    };
+
+// -----
+
+
