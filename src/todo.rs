@@ -13,6 +13,7 @@ pub struct Todo {
     title: String,
     created_at: String,
     completed: bool,
+    is_guest: bool,
 }
 
 cfg_if! {
@@ -37,6 +38,7 @@ if #[cfg(feature = "ssr")] {
         title: String,
         created_at: String,
         completed: bool,
+        is_guest:bool,
     }
 
     impl SqlTodo {
@@ -49,6 +51,8 @@ if #[cfg(feature = "ssr")] {
                 title: self.title,
                 created_at: self.created_at,
                 completed: self.completed,
+                is_guest: self.is_guest,
+
             }
         }
     }
@@ -91,20 +95,24 @@ pub async fn add_todo(cx: Scope, title: String) -> Result<(), ServerFnError> {
 
 
 
-    let id = match user {
-        Some(user) => user.id,
-        None => Uuid::new_v4(),
+    let (id, is_guest) = match user {
+        Some(user) => {
+            println!{"ADDTODO:{}", user.id}
+            (user.id, user.is_guest)
+        },
+        None => (Uuid::parse_str("0000000-0000-0000-0000-000000000000").expect("Failed to parse UUID"), false), // if no user use auth session id
     };
 
     // fake API delay
     std::thread::sleep(std::time::Duration::from_millis(1250));
 
     match sqlx::query(
-        "INSERT INTO todos (title, user_id, completed, id) VALUES (?, ?, false, ?)",
+        "INSERT INTO todos (title, user_id, completed, id, is_guest) VALUES (?, ?, false, ?, ?)",
     )
     .bind(title)
     .bind(id.to_string())
     .bind(Uuid::new_v4().to_string())
+    .bind(is_guest)
     .execute(&pool)
     .await
     {
@@ -160,15 +168,23 @@ pub fn TodoApp(cx: Scope) -> impl IntoView {
                             <A href="/login">"Login"</A>", "
                             <span>{format!("Login error: {}", e)}</span>
                         }.into_view(cx),
+                        // None should be the case anymore because get_user will default to User::new_guest(user_auth_session_id)
                         Ok(None) => view! {cx,
                             <A href="/signup">"Signup"</A>", "
                             <A href="/login">"Login"</A>", "
                             <span>"Logged out."</span>
                         }.into_view(cx),
-                        Ok(Some(user)) => view! {cx,
-                            <A href="/settings">"Settings"</A>", "
-                            <span>{format!("Logged in as: {} ({})", user.username, user.id.to_string())}</span>
-                        }.into_view(cx)
+                        Ok(Some(user)) => match user.is_guest {
+                            true => view! {cx,
+                                <A href="/signup">"Signup"</A>", "
+                                <A href="/login">"Login"</A>", "
+                                <span>"Guest user."</span>
+                            }.into_view(cx),
+                            false => view! {cx,
+                                <A href="/settings">"Settings"</A>", "
+                                <span>{format!("Logged in as: {} ({})", user.username, user.id.to_string())}</span>
+                            }.into_view(cx),
+                        }
                     })
                 }}
                 </Transition>
@@ -244,7 +260,11 @@ pub fn Todos(cx: Scope) -> impl IntoView {
                                                                 {todo.created_at}
                                                                 " by "
                                                                 {
-                                                                    todo.user.unwrap_or_default().username
+                                                                    match todo.is_guest {
+                                                                        true => "GUEST".to_string(),
+                                                                        false => todo.user.unwrap_or_default().username
+
+                                                                    }
                                                                 }
                                                                 <ActionForm action=delete_todo>
                                                                     <input type="hidden" name="id" value={todo.id.to_string()}/>

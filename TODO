@@ -28,5 +28,21 @@ pub async fn add_todo(cx: Scope, title: String) -> Result<(), ServerFnError> {
 
 /* when the page opens, if there's no current user logged in, then we want to create a UU ID for a unique guest user that will create a session for that guest user, and if you try to sign up in your currently logged into a guest session, then it will associate that sign up user with the guest UU ID */ 
 
+// 4. if user is none create 
+impl Default for User {
+    fn default() -> Self {
+        let permissions = HashSet::new();
+
+        Self {
+            id: Uuid::new_v4(), /
+            username: "Guest".into(),
+            password: "".into(),
+            permissions,
+        }
+    }
+}
+
+
+
 
 
