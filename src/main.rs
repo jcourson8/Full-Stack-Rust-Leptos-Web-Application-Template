@@ -20,6 +20,7 @@ if #[cfg(feature = "ssr")] {
     use sqlx::{SqlitePool, sqlite::SqlitePoolOptions};
     use axum_session::{SessionConfig, SessionLayer, SessionStore};
     use axum_session_auth::{AuthSessionLayer, AuthConfig, SessionSqlitePool};
+    use uuid::Uuid;
 
     async fn server_fn_handler(State(app_state): State<AppState>, auth_session: AuthSession, path: Path<String>, headers: HeaderMap, raw_query: RawQuery,
     request: Request<AxumBody>) -> impl IntoResponse {
@@ -54,7 +55,7 @@ if #[cfg(feature = "ssr")] {
 
         // Auth section
         let session_config = SessionConfig::default().with_table_name("axum_sessions");
-        let auth_config = AuthConfig::<i64>::default();
+        let auth_config = AuthConfig::<Uuid>::default();
         let session_store = SessionStore::<SessionSqlitePool>::new(Some(pool.clone().into()), session_config);
         session_store.initiate().await.unwrap();
 
@@ -91,7 +92,7 @@ if #[cfg(feature = "ssr")] {
         .route("/api/*fn_name", get(server_fn_handler).post(server_fn_handler))
         .leptos_routes_with_handler(routes, get(leptos_routes_handler) )
         .fallback(file_and_error_handler)
-        .layer(AuthSessionLayer::<User, i64, SessionSqlitePool, SqlitePool>::new(Some(pool.clone()))
+        .layer(AuthSessionLayer::<User, Uuid, SessionSqlitePool, SqlitePool>::new(Some(pool.clone()))
         .with_config(auth_config))
         .layer(SessionLayer::new(session_store))
         .with_state(app_state);

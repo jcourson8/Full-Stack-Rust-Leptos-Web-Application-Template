@@ -93,17 +93,18 @@ pub async fn add_todo(cx: Scope, title: String) -> Result<(), ServerFnError> {
 
     let id = match user {
         Some(user) => user.id,
-        None => Uuid::new(),
+        None => Uuid::new_v4(),
     };
 
     // fake API delay
     std::thread::sleep(std::time::Duration::from_millis(1250));
 
     match sqlx::query(
-        "INSERT INTO todos (title, user_id, completed) VALUES (?, ?, false)",
+        "INSERT INTO todos (title, user_id, completed, id) VALUES (?, ?, false, ?)",
     )
     .bind(title)
     .bind(id.to_string())
+    .bind(Uuid::new_v4().to_string())
     .execute(&pool)
     .await
     {

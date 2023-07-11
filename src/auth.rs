@@ -10,7 +10,7 @@ if #[cfg(feature = "ssr")] {
     use axum_session_auth::{SessionSqlitePool, Authentication, HasPermission};
     use bcrypt::{hash, verify, DEFAULT_COST};
     use crate::todo::{pool, auth};
-    pub type AuthSession = axum_session_auth::AuthSession<User, i64, SessionSqlitePool, SqlitePool>;
+    pub type AuthSession = axum_session_auth::AuthSession<User, Uuid, SessionSqlitePool, SqlitePool>;
 }}
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -88,7 +88,7 @@ if #[cfg(feature = "ssr")] {
     }
 
     #[async_trait]
-    impl Authentication<User, i64, SqlitePool> for User {
+    impl Authentication<User, Uuid, SqlitePool> for User {
         async fn load_user(userid: Uuid, pool: Option<&SqlitePool>) -> Result<User, anyhow::Error> {
             let pool = pool.unwrap();
 
@@ -153,7 +153,7 @@ pub async fn foo() -> Result<String, ServerFnError> {
 #[server(GetUser, "/api")]
 pub async fn get_user(cx: Scope) -> Result<Option<User>, ServerFnError> {
     let auth = auth(cx)?;
-
+    
     Ok(auth.current_user)
 }
 
@@ -205,9 +205,10 @@ pub async fn signup(
 
     let password_hashed = hash(password, DEFAULT_COST).unwrap();
 
-    sqlx::query("INSERT INTO users (username, password) VALUES (?,?)")
+    sqlx::query("INSERT INTO users (username, password, id) VALUES (?,?,?)")
         .bind(username.clone())
         .bind(password_hashed)
+        .bind(Uuid::new_v4().to_string())
         .execute(&pool)
         .await?;
 
