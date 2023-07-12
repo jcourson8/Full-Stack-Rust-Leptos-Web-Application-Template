@@ -11,10 +11,12 @@ if #[cfg(feature = "ssr")] {
         body::Body as AxumBody,
         Router,
     };
-    use session_auth_axum::todo::*;
-    use session_auth_axum::auth::*;
+
+    use session_auth_axum::server_fn::authentication::*;
     use session_auth_axum::state::AppState;
     use session_auth_axum::fallback::file_and_error_handler;
+    use session_auth_axum::models::user::User;
+    use session_auth_axum::views::app::App;
     use leptos_axum::{generate_route_list, LeptosRoutes, handle_server_fns_with_context};
     use leptos::{log, view, provide_context, get_configuration};
     use sqlx::{SqlitePool, sqlite::SqlitePoolOptions};
@@ -39,7 +41,7 @@ if #[cfg(feature = "ssr")] {
                 provide_context(cx, auth_session.clone());
                 provide_context(cx, app_state.pool.clone());
             },
-            |cx| view! { cx, <TodoApp/> }
+            |cx| view! { cx, <App/> }
         );
         handler(req).await.into_response()
     }
@@ -80,7 +82,7 @@ if #[cfg(feature = "ssr")] {
         let conf = get_configuration(None).await.unwrap();
         let leptos_options = conf.leptos_options;
         let addr = leptos_options.site_addr;
-        let routes = generate_route_list(|cx| view! { cx, <TodoApp/> }).await;
+        let routes = generate_route_list(|cx| view! { cx, <App/> }).await;
 
         let app_state = AppState{
             leptos_options,
