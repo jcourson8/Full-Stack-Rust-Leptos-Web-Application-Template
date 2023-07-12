@@ -12,8 +12,8 @@ if #[cfg(feature = "ssr")] {
     use tower::ServiceExt;
     use tower_http::services::ServeDir;
     use leptos::{LeptosOptions, Errors, view};
-    use crate::error_template::ErrorTemplate;
-    use crate::errors::TodoAppError;
+    use crate::views::components::error_template::ErrorTemplate;
+    use crate::models::errors::TodoAppError;
 
     pub async fn file_and_error_handler(uri: Uri, State(options): State<LeptosOptions>, req: Request<Body>) -> AxumResponse {
         let root = options.site_root.clone();

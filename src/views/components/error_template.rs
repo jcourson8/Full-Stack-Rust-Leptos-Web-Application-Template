@@ -1,4 +1,4 @@
-use crate::errors::TodoAppError;
+use crate::models::errors::TodoAppError;
 use cfg_if::cfg_if;
 use leptos::{Errors, *};
 #[cfg(feature = "ssr")]

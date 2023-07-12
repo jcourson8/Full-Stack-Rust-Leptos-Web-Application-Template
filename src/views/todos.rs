@@ -7,7 +7,7 @@ use leptos_router::{MultiActionForm, ActionForm};
 
 use crate::server_fn::todo::{get_todos, AddTodo, DeleteTodo};
 use crate::models::todo::Todo;
-use crate::error_template::ErrorTemplate;
+use crate::views::components::error_template::ErrorTemplate;
 
 
 
