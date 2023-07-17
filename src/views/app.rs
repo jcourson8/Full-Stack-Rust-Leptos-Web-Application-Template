@@ -4,7 +4,7 @@ use crate::server_fn::authentication::*;
 use leptos_meta::*;
 use leptos_router::*;
 use crate::views::components::header::Header;
-use crate::views::{signup::Signup,login::Login,settings::Settings, todos::Todos};
+use crate::views::{signup::Signup,login::Login,settings::Settings, chat::Chat};
 use crate::models::context_structs::LogoutActionContext;
 
 
@@ -45,7 +45,7 @@ pub fn App(
     );
 
     // Now, let's define the condition function.
-    let condition = move |cx: Scope| -> bool {
+    let is_logged_in = move |cx: Scope| -> bool {
         match is_authenticated.read(cx) {
             // If the resource is still pending, return false.
             None => false,
@@ -58,6 +58,35 @@ pub fn App(
             },
         }
     };
+
+    let is_not_logged_in = move |cx: Scope| -> bool {
+        match is_authenticated.read(cx) {
+            // If the resource is still pending, return false.
+            None => true,
+            // If the resource has resolved, check the Result.
+            Some(result) => match result {
+                // If there was an error, return false.
+                Err(_) => true,
+                // If the user is authenticated, return true.
+                Ok(authenticated) => !authenticated,
+            },
+        }
+    };
+
+    // Now, let's define the condition function.
+    // let already_logged_in = move |cx: Scope| -> bool {
+    //     match is_authenticated.read(cx) {
+    //         // If the resource is still pending, return false.
+    //         None => false,
+    //         // If the resource has resolved, check the Result.
+    //         Some(result) => match result {
+    //             // If there was an error, return false.
+    //             Err(_) => false,
+    //             // If the user is authenticated, return true.
+    //             Ok(authenticated) => authenticated,
+    //         },
+    //     }
+    // };
 
 
     view! {
@@ -72,23 +101,35 @@ pub fn App(
                     <ProtectedRoute 
                         path="" 
                         redirect_path="login" 
-                        condition
+                        condition=is_logged_in
                         view=|cx| view! { cx, 
-                            <Todos/> 
+                            <Chat /> 
                         }
                     /> //Route
                     <Route path="signup" view=move |cx| view! {
                         cx,
                         <Signup action=signup/>
                     }/>
-                    <Route path="login" view=move |cx| view! {
-                        cx,
-                        <Login action=login />
-                    }/>
-                    <Route path="settings" view=move |cx| view! {
-                        cx,
-                        <Settings />
-                    }/>
+                    // <Route path="logout" view=move |cx| view! {
+                    //     cx,
+                    //     <Login action=login />
+                    // }/>
+                    <ProtectedRoute 
+                        path="login" 
+                        redirect_path="/" 
+                        condition=is_not_logged_in
+                        view= move |cx| view! { cx, 
+                            <Login action=login />
+                        }
+                    /> 
+                    <ProtectedRoute 
+                        path="settings" 
+                        redirect_path="login" 
+                        condition=is_logged_in
+                        view=|cx| view! { cx, 
+                            <Settings/> 
+                        }
+                    /> 
                     // <Route path="/*any" view=move |cx| view! {
                     //     cx,
                     //     <Login action=login />

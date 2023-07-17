@@ -1,5 +1,6 @@
 use leptos::*;
 use crate::models::user::User;
+use crate::views ::components::logout_button::LogoutButton;
 use leptos_router::A;
 
 #[component]
@@ -34,7 +35,9 @@ pub fn Header(
                         }.into_view(cx),
                         false => view! {cx,
                             <A href="/settings" class="text-white">"Settings"</A>", "
+                            // <A href="/logout" class="text-white">"Logout"</A>", " // New Logout link here
                             <span class="text-white-500">{format!("Logged in as: {} ({})", user.username, user.id.to_string())}</span>
+                            <LogoutButton style="text-white"/>
                         }.into_view(cx),
                     }
                 })
