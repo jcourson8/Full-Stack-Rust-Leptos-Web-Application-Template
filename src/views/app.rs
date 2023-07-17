@@ -4,7 +4,9 @@ use crate::server_fn::authentication::*;
 use leptos_meta::*;
 use leptos_router::*;
 use crate::views::components::header::Header;
-use crate::views::{signup::Signup,login::Login,settings::Logout, todos::Todos};
+use crate::views::{signup::Signup,login::Login,settings::Settings, todos::Todos};
+use crate::models::context_structs::LogoutActionContext;
+
 
 
 
@@ -13,7 +15,7 @@ pub fn App(
     cx: Scope
 ) -> impl IntoView {
 
-    let login = create_server_action::<Login>(cx);
+    let login: Action<Login, Result<(), ServerFnError>> = create_server_action::<Login>(cx);
     let logout = create_server_action::<Logout>(cx);
     let signup = create_server_action::<Signup>(cx);
     // let authenticate = create_server_action::<IsAuthenticated>(cx);
@@ -30,9 +32,10 @@ pub fn App(
         move |_| get_user(cx),
     );
     provide_meta_context(cx);
+    provide_context(cx, LogoutActionContext(logout));
 
 
-    // let is_authenticated = authenticate.dispatch()
+
 
     // First, let's create a resource for the 'is_authenticated' function.
     let is_authenticated = create_resource(
@@ -84,9 +87,13 @@ pub fn App(
                     }/>
                     <Route path="settings" view=move |cx| view! {
                         cx,
-                        <h1>"Settings"</h1>
-                        <Logout action=logout />
+                        <Settings />
                     }/>
+                    // <Route path="/*any" view=move |cx| view! {
+                    //     cx,
+                    //     <Login action=login />
+                    // }/>
+                    
                 </Routes>
             </main>
         </Router>
