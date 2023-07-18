@@ -10,8 +10,8 @@ pub fn Header(
 ) -> impl IntoView {
 
     view! { cx, 
-        <header class="bg-gray-800 p-4 text-white">
-            <A href="/" class="text-2xl font-bold"><h1>"My Tasks"</h1></A>
+        <header class="bg-gray-900 p-4 text-white fixed top-0 w-full z-50">
+            <A href="/" class="text-2xl font-bold"><h1>"Home"</h1></A>
             <Transition
                 fallback=move || view! {cx, <span class="text-gray-300">"Loading..."</span>}
             >

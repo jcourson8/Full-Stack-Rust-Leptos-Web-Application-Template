@@ -1,18 +1,18 @@
 use leptos::*;
-use crate::models::chat::chat_history::ChatHistory;
+use crate::models::chat::chat_message_pair::ChatMessagePair;
 use crate::views::components::display_uploads::DisplayUploads;
 
 #[component]
 pub fn ChatMessagePair(
     cx: Scope,
 
-    chat_history: ReadSignal<ChatHistory>,
+    chat_message_pair: ReadSignal<ChatMessagePair>,
     // documents_upload: Option<Vec<String>>,
 ) -> impl IntoView {
 
 
     let display_uploads = move || {
-        let documents_upload: Option<Vec<String>> = chat_history.get().documents_upload.clone();
+        let documents_upload: Option<Vec<String>> = chat_message_pair.get().documents_upload.clone();
     
         match documents_upload {
             Some(documents) => view!{cx, <DisplayUploads uploads=documents />}.into_view(cx),
@@ -20,11 +20,11 @@ pub fn ChatMessagePair(
         }
     };
     
-    let chat_history_user = move|| { 
-        chat_history.get().user_message.unwrap_or("ERROR".to_string())
+    let chat_message_pair_user = move|| { 
+        chat_message_pair.get().user_message.unwrap_or("ERROR".to_string())
     };
-    let chat_history_assistant = move|| { 
-        chat_history.get().assistant.unwrap_or("THINKING".to_string())
+    let chat_message_pair_assistant = move|| { 
+        chat_message_pair.get().assistant_message.unwrap_or("THINKING".to_string())
     };
 
 
@@ -43,7 +43,7 @@ pub fn ChatMessagePair(
             </div>
             // Render the text content with markdown
             <p class="prose ml-[6px] mt-1"> //dark:prose-invert
-                {chat_history_user()}
+                {chat_message_pair_user()}
             </p>
                 
             
@@ -58,7 +58,7 @@ pub fn ChatMessagePair(
             </div>
             // Render the text content with markdown
             <p class="prose ml-[6px] mt-1"> //dark:prose-invert
-                {chat_history_assistant()}
+                {chat_message_pair_assistant()}
             </p>
                 
             

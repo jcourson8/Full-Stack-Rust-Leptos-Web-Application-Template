@@ -1,20 +1,20 @@
 use leptos::{*, html::Input, ev::SubmitEvent};
 use uuid::Uuid;
-use crate::models::chat::chat_history::ChatHistory;
+use crate::models::chat::chat_message_pair::ChatMessagePair;
 use chrono::{DateTime, Utc};
 
 #[component]
 pub fn ChatInput(
     cx: Scope,
     input_element: NodeRef<Input>,
-    histories_signal: (ReadSignal<Vec<(ReadSignal<ChatHistory>, WriteSignal<ChatHistory>)>>, WriteSignal<Vec<(ReadSignal<ChatHistory>, WriteSignal<ChatHistory>)>>),
+    histories_signal: (ReadSignal<Vec<(ReadSignal<ChatMessagePair>, WriteSignal<ChatMessagePair>)>>, WriteSignal<Vec<(ReadSignal<ChatMessagePair>, WriteSignal<ChatMessagePair>)>>),
 
 ) -> impl IntoView {
     let (_current_history, set_current_history) = histories_signal;
 
     let (user_msg, _set_user_msg) = create_signal(cx, String::new());
 
-    let add_chat_history = move |ev: SubmitEvent| {
+    let add_chat_message_pair = move |ev: SubmitEvent| {
         ev.prevent_default();
         
 
@@ -23,16 +23,16 @@ pub fn ChatInput(
             .expect("<input> to exist")
             .value();
 
-        let chat_history = ChatHistory {
+        let chat_message_pair = ChatMessagePair {
             message_id: Uuid::new_v4(),
             chat_id: Uuid::new_v4(),
             user_message: Some(String::from(usr_msg)),
-            assistant: None,
+            assistant_message: None,
             message_time: Some(Utc::now()),
             documents_upload: Some(vec![String::from("doc1.pdf"), String::from("doc2.pdf")]),
         };
-        // sig is (chat_history, set_chat_historytory)
-        let sig = create_signal(cx, chat_history);
+        // sig is (chat_message_pair, set_chat_message_pairtory)
+        let sig = create_signal(cx, chat_message_pair);
 
         // add the user msg while we wait for response 
         set_current_history.update(move |current_history| {
@@ -43,11 +43,11 @@ pub fn ChatInput(
 
         set_current_history.update(move |current_history| {
 
-            if let Some((last_chat_history, last_chat_history_setter)) = current_history.last_mut() {
+            if let Some((last_chat_message_pair, last_chat_message_pair_setter)) = current_history.last_mut() {
 
-                let mut cloned_last_chat_history = last_chat_history.get().clone();
-                cloned_last_chat_history.assistant = Some(String::from("Assistant's response"));
-                let sig: (ReadSignal<ChatHistory>, WriteSignal<ChatHistory>) = create_signal(cx, cloned_last_chat_history);
+                let mut cloned_last_chat_message_pair = last_chat_message_pair.get().clone();
+                cloned_last_chat_message_pair.assistant_message = Some(String::from("Assistant's response"));
+                let sig: (ReadSignal<ChatMessagePair>, WriteSignal<ChatMessagePair>) = create_signal(cx, cloned_last_chat_message_pair);
                 current_history.pop();
                 current_history.push(sig);
         
@@ -58,8 +58,8 @@ pub fn ChatInput(
 
     view! { cx,
         <form 
-            on:submit=add_chat_history
-            class="sticky bottom-0 p-5 bg-whiterounded-t-md border border-black/10 border-b-0 w-full max-w-3xl flex items-center justify-center gap-2 z-20" //dark:bg-black dark:border-white/25 
+            on:submit=add_chat_message_pair
+            class="sticky bottom-0 p-5 bg-whiterounded-t-md border border-black/10 border-b-0 w-full flex items-center justify-center gap-2 z-20" //dark:bg-black dark:border-white/25 
         >
             <input
                 autoFocus

@@ -1,9 +1,11 @@
 // use crate::components::*;
 use crate::server_fn::authentication::Signup;
-use leptos_router::ActionForm;
+use leptos_router::{ActionForm}; //FromFormData
 use leptos::{*, ev::SubmitEvent};
 use crate::views::components::password_strength_bar::PasswordStrengthBar;
+use crate::views::components::toggle_visability_input::ToggleVisabilityInput;
 use leptos::html::Button;
+
 
 #[component]
 pub fn Signup(
@@ -15,25 +17,7 @@ pub fn Signup(
     
     let (confirm_password, set_confirm_password) = create_signal(cx, String::new());
     let (confirm_password_border_color, set_confirm_password_border_color) = create_signal(cx, "".to_string());
-
-    let (password_visability, set_password_visability) = create_signal(cx, "password".to_string());
-    let (confirm_password_visability, set_confirm_password_visability) = create_signal(cx, "password".to_string());
     
-    let toggle_password = move |_| {
-        if password_visability() == "password".to_string() {
-            set_password_visability("text".to_string());
-        } else {
-            set_password_visability("password".to_string())
-        }
-    };
-
-    let toggle_confirm_password = move |_| {
-        if confirm_password_visability() == "password".to_string() {
-            set_confirm_password_visability("text".to_string());
-        } else {
-            set_confirm_password_visability("password".to_string())
-        }
-    };
 
 
     let (password_strength, set_password_strength) = create_signal(cx, 0.0 as f64);
@@ -62,13 +46,20 @@ pub fn Signup(
             // ev.prevent_default() will prevent form submission
             ev.prevent_default();
 
-        }
+        } 
+        //     action.submit(cx, Signup {
+        //         username: ev.form_data.get("username").unwrap(),
+        //         password: ev.form_data.get("password").unwrap(),
+        //         email: ev.form_data.get("email").unwrap(),
+        //     });
+        // }
+        // Signup::from_event(&ev);
     };
 
     view! {
         cx,
         <div class="px-8 pt-10 max-w-md mx-auto mt-5 mb-5">
-        <ActionForm action=action class="flex flex-col space-y-4" on:submit=on_submit >
+        <ActionForm action=action class="flex flex-col space-y-4" on:submit=on_submit>
             <h1 class="text-2xl font-bold text-center">"Sign Up"</h1>
 
             <label class="flex flex-col" for="password">
@@ -82,40 +73,30 @@ pub fn Signup(
                 "Email:"
             </label>
             <label class="flex flex-col">
-                <input type="text" placeholder="Email" maxlength="32" name="username" class="auth-input px-3 py-2 border border-gray-300 rounded-md" required/>
+                <input type="text" placeholder="Email" maxlength="32" name="email" class="auth-input px-3 py-2 border border-gray-300 rounded-md" required/>
             </label>
 
+            <ToggleVisabilityInput
+                label="Password:"
+                input_name="password"
+                toggle_button_phrase="show" 
+                placeholder="Password"
+                on_input=on_password_input
+            />
 
-            <label class="flex flex-col" for="password">
-                "Password:"
-            </label>
-            <div class="relative w-full flex flex-col">
-                <div class="absolute inset-y-0 right-0 flex items-center px-2">
-                    <input class="hidden" id="toggle" type="checkbox" />
-                    <label class="bg-gray-300 hover:bg-gray-400 rounded px-2 py-1 text-sm text-gray-600 cursor-pointer" for="toggle" on:click=toggle_password>"show"</label>
-                </div>
-                <input class="auth-input px-3 py-2 border border-gray-300 rounded-md" name="password" type=password_visability placeholder="Password" on:input=on_password_input required
-                />
-            </div>
+            <ToggleVisabilityInput
+                label="Confirm Password:"
+                input_name="password_confirmation"
+                toggle_button_phrase="show"
+                placeholder="Confirm Password"
+                on_input=on_confirm_password_input
+                reactive_input_style=confirm_password_border_color
+            />
 
-            <label class="flex flex-col" for="password_confirm">
-                "Confirm Password:"
-            </label>
-            <div class="relative w-full flex flex-col">
-                <div class="absolute inset-y-0 right-0 flex items-center px-2">
-                    <input class="hidden" id="toggle_confirm" type="checkbox" />
-                    <label class="bg-gray-300 hover:bg-gray-400 rounded px-2 py-1 text-sm text-gray-600 cursor-pointer" for="toggle_confirm" on:click=toggle_confirm_password>"show"</label>
-                </div>
-                <input class={move || format!("auth-input px-3 py-2 border {} rounded-md", confirm_password_border_color())} name="password_confirm" type=confirm_password_visability  placeholder="Confirm Password" on:input=on_confirm_password_input required
-                />
-            </div>
-
-            // <label class="flex flex-col">
-            //     "Confirm Password:"
-            //     <input type="password" placeholder="Password again" name="password_confirmation" class={move || format!("auth-input px-3 py-2 border {} rounded-md", confirm_password_border_color())} on:input=on_confirm_password_input />
-            // </label>
-
-            <PasswordStrengthBar password=password password_strength_signal=(password_strength, set_password_strength) />
+            <PasswordStrengthBar 
+                password=password 
+                password_strength_signal=(password_strength, set_password_strength) 
+            />
             <label class="flex items-center">
                 <input type="checkbox" name="remember" class="auth-input mr-2" />
                 "Remember me?"
