@@ -1,19 +1,19 @@
 
 pub mod authentication;
-pub mod todo;
+// pub mod todo;
 
 
 use cfg_if::cfg_if;
 cfg_if! {
     if #[cfg(feature = "ssr")] {
         pub use self::authentication::AuthSession;
-        use sqlx::SqlitePool;
+        use sqlx::PgPool;
         use leptos::Scope;
         use leptos::ServerFnError;
         use leptos::use_context;
 
-        pub fn pool(cx: Scope) -> Result<SqlitePool, ServerFnError> {
-        use_context::<SqlitePool>(cx)
+        pub fn pool(cx: Scope) -> Result<PgPool, ServerFnError> {
+        use_context::<PgPool>(cx)
                 .ok_or_else(|| ServerFnError::ServerError("Pool missing.".into()))
         }
 

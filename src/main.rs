@@ -19,10 +19,12 @@ if #[cfg(feature = "ssr")] {
     use session_auth_axum::views::app::App;
     use leptos_axum::{generate_route_list, LeptosRoutes, handle_server_fns_with_context};
     use leptos::{log, view, provide_context, get_configuration};
-    use sqlx::{SqlitePool, sqlite::SqlitePoolOptions};
+    use sqlx::{PgPool, postgres::PgPoolOptions};
     use axum_session::{SessionConfig, SessionLayer, SessionStore};
-    use axum_session_auth::{AuthSessionLayer, AuthConfig, SessionSqlitePool};
+    use axum_session_auth::{AuthSessionLayer, AuthConfig, SessionPgPool};
     use uuid::Uuid;
+
+    use dotenv;
 
     async fn server_fn_handler(State(app_state): State<AppState>, auth_session: AuthSession, path: Path<String>, headers: HeaderMap, raw_query: RawQuery,
     request: Request<AxumBody>) -> impl IntoResponse {
@@ -50,21 +52,24 @@ if #[cfg(feature = "ssr")] {
     async fn main() {
         simple_logger::init_with_level(log::Level::Info).expect("couldn't initialize logging");
 
-        let pool = SqlitePoolOptions::new()
-            .connect("sqlite:Todos.db")
+        dotenv::dotenv().ok(); 
+        let database_url = &dotenv::var("DATABASE_URL").unwrap();
+
+        let pool = PgPoolOptions::new()
+            .connect(database_url)
             .await
             .expect("Could not make pool.");
 
         // Auth section
         let session_config = SessionConfig::default().with_table_name("axum_sessions");
         let auth_config = AuthConfig::<Uuid>::default();
-        let session_store = SessionStore::<SessionSqlitePool>::new(Some(pool.clone().into()), session_config);
+        let session_store = SessionStore::<SessionPgPool>::new(Some(pool.clone().into()), session_config);
         session_store.initiate().await.unwrap();
 
-        sqlx::migrate!()
-            .run(&pool)
-            .await
-            .expect("could not run SQLx migrations");
+        // sqlx::migrate!()
+        //     .run(&pool)
+        //     .await
+        //     .expect("could not run SQLx migrations");
 
         // Explicit server function registration is no longer required
         // on the main branch. On 0.3.0 and earlier, uncomment the lines
@@ -94,7 +99,7 @@ if #[cfg(feature = "ssr")] {
         .route("/api/*fn_name", get(server_fn_handler).post(server_fn_handler))
         .leptos_routes_with_handler(routes, get(leptos_routes_handler) )
         .fallback(file_and_error_handler)
-        .layer(AuthSessionLayer::<User, Uuid, SessionSqlitePool, SqlitePool>::new(Some(pool.clone()))
+        .layer(AuthSessionLayer::<User, Uuid, SessionPgPool, PgPool>::new(Some(pool.clone()))
         .with_config(auth_config))
         .layer(SessionLayer::new(session_store))
         .with_state(app_state);

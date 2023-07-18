@@ -1,26 +1,80 @@
--- Updated with Uuid for ID'ss
+-- -- Updated with Uuid for ID'ss
+-- CREATE TABLE IF NOT EXISTS users (
+--   id         TEXT NOT NULL PRIMARY KEY,
+--   username   TEXT NOT NULL UNIQUE,
+--   password   TEXT NOT NULL,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- CREATE TABLE IF NOT EXISTS user_permissions (
+--     user_id  TEXT NOT NULL,
+--     token    TEXT NOT NULL,
+--     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+-- );
+
+-- CREATE TABLE IF NOT EXISTS todos (
+--   id         TEXT PRIMARY KEY,
+--   user_id    TEXT NOT NULL,
+--   title      TEXT NOT NULL,
+--   completed  BOOLEAN,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--   is_guest  BOOLEAN NOT NULL
+--   -- FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+-- );
+
+
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE IF NOT EXISTS users (
-  id         TEXT NOT NULL PRIMARY KEY,
-  username   TEXT NOT NULL UNIQUE,
+  id         UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  username   VARCHAR(255) NOT NULL UNIQUE,
   password   TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMPTZ DEFAULT current_timestamp
 );
 
 CREATE TABLE IF NOT EXISTS user_permissions (
-    user_id  TEXT NOT NULL,
+    user_id  UUID NOT NULL,
     token    TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS todos (
-  id         TEXT PRIMARY KEY,
-  user_id    TEXT NOT NULL,
+  id         UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id    UUID NOT NULL,
   title      TEXT NOT NULL,
   completed  BOOLEAN,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  is_guest  BOOLEAN NOT NULL
-  -- FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+  created_at TIMESTAMPTZ DEFAULT current_timestamp,
+  is_guest   BOOLEAN NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE IF NOT EXISTS chat_message_pairs (
+    message_id        UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+    chat_id           UUID NOT NULL,
+    user_message      TEXT,
+    assistant_message TEXT,
+    message_time      TIMESTAMPTZ,
+    documents_upload  TEXT[]
+);
+
+CREATE TABLE IF NOT EXISTS chats (
+    chat_id        UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id        UUID NOT NULL,
+    creation_time  TIMESTAMPTZ NOT NULL DEFAULT current_timestamp,
+    chat_name      VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+
+
+
+
+
+
+
+
 
 
 

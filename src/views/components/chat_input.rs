@@ -1,7 +1,7 @@
 use leptos::{*, html::Input, ev::SubmitEvent};
 use uuid::Uuid;
 use crate::models::chat::chat_message_pair::ChatMessagePair;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 
 #[component]
 pub fn ChatInput(

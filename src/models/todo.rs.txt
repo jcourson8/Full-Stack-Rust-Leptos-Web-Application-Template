@@ -16,7 +16,7 @@ pub struct Todo {
 cfg_if! {
 if #[cfg(feature = "ssr")] {
 
-    use sqlx::SqlitePool;
+    use sqlx::PgPool;
 
     #[derive(sqlx::FromRow, Clone)]
     pub struct SqlTodo {
@@ -29,7 +29,7 @@ if #[cfg(feature = "ssr")] {
     }
 
     impl SqlTodo {
-        pub async fn into_todo(self, pool: &SqlitePool) -> Todo {
+        pub async fn into_todo(self, pool: &PgPool) -> Todo {
             Todo {
                 // id: self.id,
                 // user: User::get(self.user_id, pool).await,

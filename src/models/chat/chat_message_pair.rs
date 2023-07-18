@@ -14,27 +14,27 @@ pub struct ChatMessagePair {
 
 cfg_if! {
 if #[cfg(feature = "ssr")] {
-    use async_trait::async_trait;
-    use sqlx::SqlitePool;
-    use axum_session_auth::{SessionSqlitePool, Authentication, HasPermission};
+    // use async_trait::async_trait;
+    use sqlx::PgPool;
+    // use axum_session_auth::{SessionPgPool, Authentication, HasPermission};
     
     impl ChatMessagePair {
-        pub async fn get(message_id: Uuid, pool: &SqlitePool) -> Option<Self> {
-            let sql_chat_message_pair = sqlx::query_as::<_, SqlChatMessagePair>("SELECT * FROM chat_message_pairs WHERE message_id = ?")
-                .bind(message_id.to_string())
+        pub async fn get(message_id: Uuid, pool: &PgPool) -> Option<Self> {
+            let sql_chat_message_pair = sqlx::query_as::<_, SqlChatMessagePair>("SELECT * FROM chat_message_pairs WHERE message_id = $1")
+                .bind(message_id)
                 .fetch(pool)
-                .await
+                // .await
                 .ok()?;
 
             Some(sql_chat_message_pair.into_chat_message_pair())
         }
 
-        pub async fn update_chat_message_pair(chat_id:Uuid, user_message: String, assistant_message: String, pool: &SqlitePool) -> Option<Self> {
+        pub async fn update_chat_message_pair(chat_id:Uuid, user_message: String, assistant_message: String, pool: &PgPool) -> Option<Self> {
 
-            sqlx::query_as::<_, SqlChatMessagePair>("UPDATE chat_message_pairs SET user_message = ?, assistant_message = ? WHERE chat_id = ?")
+            sqlx::query_as::<_, SqlChatMessagePair>("UPDATE chat_message_pairs SET user_message = $1, assistant_message = $2 WHERE chat_id = $3")
                 .bind(user_message)
                 .bind(assistant_message)
-                .bind(chat_id.to_string())
+                .bind(chat_id)
                 .execute(pool)
                 .await
                 .ok()?;
@@ -80,8 +80,8 @@ if #[cfg(feature = "ssr")] {
 
 
     // #[async_trait]
-    // impl Authentication<User, Uuid, SqlitePool> for User {
-    //     async fn load_chat_message_pair(message_id: Uuid, pool: Option<&SqlitePool>) -> Result<User, anyhow::Error> {
+    // impl Authentication<User, Uuid, PgPool> for User {
+    //     async fn load_chat_message_pair(message_id: Uuid, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
     //         let pool = pool.unwrap();
 
     //         ChatMessagePair::get(message_id, pool)

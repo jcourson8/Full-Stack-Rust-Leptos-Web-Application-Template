@@ -1,6 +1,6 @@
 // 1. need to hand error if cannot parse from database rather than "expect"
 impl SqlTodo {
-        pub async fn into_todo(self, pool: &SqlitePool) -> Todo {
+        pub async fn into_todo(self, pool: &PgPool) -> Todo {
 
 
 impl SqlUser {
@@ -49,3 +49,25 @@ impl Default for User {
 
 
 on login redirect to page they were going to 
+
+
+
+
+better error for:
+
+#[server(Login, "/api")]
+pub async fn login(
+    cx: Scope,
+    username: String,
+    password: String,
+    remember: Option<String>,
+) -> Result<(), ServerFnError> {
+    let pool = pool(cx).map_err(|e| {
+        log::warn!("Error getting pool from context: {}", e);
+        // Server func error should be more generic and not leak database errors
+        ServerFnError::ServerError(format!("TODO BETTER ERROR"))
+    })?;
+    let auth = auth(cx)?;
+
+
+when parsing the sql we nede to pass the error to the ok_or_else{}
