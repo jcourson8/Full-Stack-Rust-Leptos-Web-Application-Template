@@ -12,6 +12,8 @@ pub fn Signup(
     cx: Scope,
     action: Action<Signup, Result<(), ServerFnError>>,
 ) -> impl IntoView {
+    let log_uuid = uuid::Uuid::new_v4();
+    log::info!("[route] [Signup - {}]", log_uuid);
 
     let (password, set_password) = create_signal(cx, String::new());
     

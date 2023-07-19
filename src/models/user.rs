@@ -108,11 +108,14 @@ if #[cfg(feature = "ssr")] {
     #[async_trait]
     impl Authentication<User, Uuid, PgPool> for User {
         async fn load_user(userid: Uuid, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
+            let log_uuid = Uuid::new_v4();
+            log::info!("[load_user - {}] Loading user with id: {}", log_uuid.clone(), userid);
             let pool = pool.ok_or(PoolError::ConnectionError)?;
-
+            
             let user = User::get(userid, pool)
                 .await
                 .map_err(|e| {
+                    log::info!("[load_user - {}] User {} not found.", log_uuid.clone(), userid);
                     anyhow::anyhow!("{:?}",e.to_string()) // TODO fix
                 })?
                 .ok_or_else(|| {

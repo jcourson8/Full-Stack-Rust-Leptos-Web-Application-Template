@@ -4,46 +4,61 @@ use leptos::ev::Event;
 // use leptos::ev::SubmitEvent;
 // use leptos::html::Button;
 use leptos_router::ActionForm;
+use crate::server_fn::authentication::Login;
 
 
 #[component]
-pub fn Login(
+pub fn LoginView(
     cx: Scope,
     action: Action<Login, Result<(), ServerFnError>>,
 ) -> impl IntoView {
+    let log_uuid = uuid::Uuid::new_v4();
+    log::info!("[route] [Login - {}]", log_uuid);
 
     let on_input_nop = move |_: Event| {
         // do nothing
     };
+    
+    // let on_submit = move |ev| {
+    //     let data = Login::from_event(&ev);
+    //     // silly example of validation: if the todo is "nope!", nope it
+    //     if data.is_err() {
+    //         // ev.prevent_default() will prevent form submission
+    //         ev.prevent_default();
+    //     }
+    // };
+
 
     view! {
-    cx,
-    <div class="px-8 pt-10 max-w-md mx-auto mt-5 mb-5">
-        <ActionForm action=action class="flex flex-col space-y-4" > //on:submit=on_submit
-            <h1 class="text-2xl font-bold text-center">"Log In"</h1>
+        cx,
+        <div class="px-8 pt-10 max-w-md mx-auto mt-5 mb-5">
+            {log::info!("Here1");}
+            <ActionForm action=action class="flex flex-col space-y-4"> //on:submit=on_submit
+                {log::info!("Here2");}
+                <h1 class="text-2xl font-bold text-center">"Log In"</h1>
 
-            <label class="flex flex-col" for="username">
-                "User ID:"
-            </label>
-            <label class="flex flex-col">
-                <input type="text" placeholder="User ID" maxlength="32" name="username" class="auth-input px-3 py-2 border border-gray-300 rounded-md" required/>
-            </label>
+                <label class="flex flex-col" for="username">
+                    "User ID:"
+                </label>
+                <label class="flex flex-col">
+                    <input type="text" placeholder="User ID" maxlength="32" name="username" class="auth-input px-3 py-2 border border-gray-300 rounded-md" required/>
+                </label>
 
-            <ToggleVisabilityInput
-                label="Password:"
-                toggle_button_phrase="show" 
-                placeholder="Password"
-                on_input=on_input_nop
-            />
+                <ToggleVisabilityInput
+                    label="Password:"
+                    toggle_button_phrase="show" 
+                    placeholder="Password"
+                    on_input=on_input_nop
+                />
 
-            <label class="flex items-center">
-                <input type="checkbox" name="remember" class="auth-input mr-2" />
-                "Remember me?"
-            </label>
-            <button type="submit" class="button px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">"Log In"</button>
-        </ActionForm>
-    </div>
-}
+                <label class="flex items-center">
+                    <input type="checkbox" name="remember" class="auth-input mr-2" />
+                    "Remember me?"
+                </label>
+                <button type="submit" class="button px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">"Log In"</button>
+            </ActionForm>
+        </div>
+    }
 }
 
 // // ChatGPT

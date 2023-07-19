@@ -66,10 +66,10 @@ if #[cfg(feature = "ssr")] {
         let session_store = SessionStore::<SessionPgPool>::new(Some(pool.clone().into()), session_config);
         session_store.initiate().await.unwrap();
 
-        // sqlx::migrate!()
-        //     .run(&pool)
-        //     .await
-        //     .expect("could not run SQLx migrations");
+        sqlx::migrate!()
+            .run(&pool)
+            .await
+            .expect("could not run SQLx migrations");
 
         // Explicit server function registration is no longer required
         // on the main branch. On 0.3.0 and earlier, uncomment the lines

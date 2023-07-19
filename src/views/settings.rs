@@ -5,6 +5,8 @@ use crate::views::components::logout_button::LogoutButton;
 pub fn Settings(
     cx: Scope,
 ) -> impl IntoView {
+    let log_uuid = uuid::Uuid::new_v4();
+    log::info!("[route] [Settings - {}]", log_uuid);
 
     view! {
         cx,

@@ -5,6 +5,8 @@ use::leptos::*;
 pub fn Chat(
     cx: Scope
 ) -> impl IntoView {
+    let log_uuid = uuid::Uuid::new_v4();
+    log::info!("[route] [Chat - {}]", log_uuid);
 
     view! { cx,
         <div>"HELLO WORLD"</div>
