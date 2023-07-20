@@ -1,19 +1,24 @@
 // use crate::components::*;
-use crate::server_fn::authentication::Signup;
-use leptos_router::{ActionForm}; //FromFormData
+// use crate::server_fn::authentication::Signup;
+use leptos_router::ActionForm; //FromFormData
 use leptos::{*, ev::SubmitEvent};
 use crate::views::components::password_strength_bar::PasswordStrengthBar;
 use crate::views::components::toggle_visability_input::ToggleVisabilityInput;
 use leptos::html::Button;
 
+use crate::models::context_structs::SignupActionContext;
+
 
 #[component]
 pub fn Signup(
     cx: Scope,
-    action: Action<Signup, Result<(), ServerFnError>>,
+    // action: Action<Signup, Result<(), ServerFnError>>,
 ) -> impl IntoView {
     let log_uuid = uuid::Uuid::new_v4();
     log::info!("[route] [Signup - {}]", log_uuid);
+
+    let signup: Action<crate::server_fn::authentication::Signup, Result<(), ServerFnError>> = use_context::<SignupActionContext>(cx).unwrap().0;
+
 
     let (password, set_password) = create_signal(cx, String::new());
     
@@ -61,7 +66,7 @@ pub fn Signup(
     view! {
         cx,
         <div class="px-8 pt-10 max-w-md mx-auto mt-5 mb-5">
-        <ActionForm action=action class="flex flex-col space-y-4" on:submit=on_submit>
+        <ActionForm action=signup class="flex flex-col space-y-4" on:submit=on_submit>
             <h1 class="text-2xl font-bold text-center">"Sign Up"</h1>
 
             <label class="flex flex-col" for="password">
@@ -71,12 +76,12 @@ pub fn Signup(
                 <input type="text" placeholder="User ID" maxlength="32" name="username" class="auth-input px-3 py-2 border border-gray-300 rounded-md" required/>
             </label>
 
-            <label class="flex flex-col" for="password">
-                "Email:"
-            </label>
-            <label class="flex flex-col">
-                <input type="text" placeholder="Email" maxlength="32" name="email" class="auth-input px-3 py-2 border border-gray-300 rounded-md" required/>
-            </label>
+            // <label class="flex flex-col" for="password">
+            //     "Email:"
+            // </label>
+            // <label class="flex flex-col">
+            //     <input type="text" placeholder="Email" maxlength="32" name="email" class="auth-input px-3 py-2 border border-gray-300 rounded-md" required/>
+            // </label>
 
             <ToggleVisabilityInput
                 label="Password:"

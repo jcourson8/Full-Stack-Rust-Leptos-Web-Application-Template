@@ -203,7 +203,7 @@ pub async fn logout(cx: Scope) -> Result<(), ServerFnError> {
     let auth = auth(cx)?;
 
     auth.logout_user();
-    leptos_axum::redirect(cx, "/");
+    leptos_axum::redirect(cx, "/login");
 
     Ok(())
 }

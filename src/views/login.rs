@@ -4,36 +4,31 @@ use leptos::ev::Event;
 // use leptos::ev::SubmitEvent;
 // use leptos::html::Button;
 use leptos_router::ActionForm;
-use crate::server_fn::authentication::Login;
+// use crate::server_fn::authentication::Login;
+use crate::models::context_structs::LoginActionContext;
 
 
 #[component]
 pub fn LoginView(
     cx: Scope,
-    action: Action<Login, Result<(), ServerFnError>>,
+    // action: Action<Login, Result<(), ServerFnError>>,
 ) -> impl IntoView {
     let log_uuid = uuid::Uuid::new_v4();
     log::info!("[route] [Login - {}]", log_uuid);
+
+    let login: Action<crate::server_fn::authentication::Login, Result<(), ServerFnError>> = use_context::<LoginActionContext>(cx).unwrap().0;
+
 
     let on_input_nop = move |_: Event| {
         // do nothing
     };
     
-    // let on_submit = move |ev| {
-    //     let data = Login::from_event(&ev);
-    //     // silly example of validation: if the todo is "nope!", nope it
-    //     if data.is_err() {
-    //         // ev.prevent_default() will prevent form submission
-    //         ev.prevent_default();
-    //     }
-    // };
-
 
     view! {
         cx,
         <div class="px-8 pt-10 max-w-md mx-auto mt-5 mb-5">
             {log::info!("Here1");}
-            <ActionForm action=action class="flex flex-col space-y-4"> //on:submit=on_submit
+            <ActionForm action=login class="flex flex-col space-y-4"> //on:submit=on_submit
                 {log::info!("Here2");}
                 <h1 class="text-2xl font-bold text-center">"Log In"</h1>
 
