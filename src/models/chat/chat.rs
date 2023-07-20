@@ -64,8 +64,8 @@ cfg_if! {
         impl SqlChat {
             pub fn into_chat(self) -> Chat {
                 Chat {
-                    chat_id: Uuid::parse_str(&self.chat_id).unwrap(),
-                    user_id: Uuid::parse_str(&self.user_id).unwrap(),
+                    chat_id: self.chat_id,
+                    user_id: self.user_id,
                     creation_time: self.creation_time,
                     chat_name: self.chat_name,
                 }

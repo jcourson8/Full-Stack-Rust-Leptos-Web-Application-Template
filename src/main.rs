@@ -60,6 +60,7 @@ if #[cfg(feature = "ssr")] {
             .await
             .expect("Could not make pool.");
 
+
         // Auth section
         let session_config = SessionConfig::default().with_table_name("axum_sessions");
         let auth_config = AuthConfig::<Uuid>::default();
