@@ -9,7 +9,7 @@ pub fn Chat(
     log::info!("[route] [Chat - {}]", log_uuid);
 
     view! { cx,
-        <div>"HELLO WORLD"</div>
+        <div>"Protected View"</div>
     }
 }
 

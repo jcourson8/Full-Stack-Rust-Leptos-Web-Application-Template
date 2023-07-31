@@ -13,10 +13,10 @@ rand = { version = "0.8.5", features = ["min_const_gen"], optional = true }
 console_error_panic_hook = "0.1.7"
 futures = "0.3.25"
 cfg-if = "1.0.0"
-leptos = { version = "0.4.4", features = ["nightly"] }
-leptos_axum = { version = "0.4.4", optional = true }
-leptos_meta = { version = "0.4.4", features = ["nightly"] }
-leptos_router = { version = "0.4.4", features = ["nightly"] }
+leptos = { version = "0.4", features = ["nightly"] }
+leptos_axum = { version = "0.4", optional = true }
+leptos_meta = { version = "0.4", features = ["nightly"] }
+leptos_router = { version = "0.4", features = ["nightly"] }
 # leptos = { git = "https://github.com/leptos-rs/leptos", branch = "main", features = ["nightly"] }
 # leptos_axum = { git = "https://github.com/leptos-rs/leptos", branch = "main", optional = true }
 # leptos_meta = { git = "https://github.com/leptos-rs/leptos", branch = "main", features = ["nightly"] }
@@ -44,6 +44,7 @@ passwords = "3.1.13"
 chrono = "0.4.26"
 dotenv = { version = "0.15.0", optional = true }
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "uuid"], optional = true }
+# web-sys = { version = "0.3.64", features = ["PerformanceNavigationTiming", "Window"] }
 
 [dependencies.getrandom]
 version = "0.2.10"

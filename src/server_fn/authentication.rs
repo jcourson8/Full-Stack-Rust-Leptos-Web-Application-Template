@@ -83,8 +83,10 @@ pub async fn login(
 
     match verify(password, &user.password)? {
         true => {
+            log::error!("[Login - {}] auth.login_user: {}", log_uuid.clone(), user.id.to_string());
             auth.login_user(user.id);
-            auth.remember_user(remember.is_some());
+            // auth.remember_user(remember.is_some());
+            log::error!("[Login - {}] redirect to /", log_uuid);
             leptos_axum::redirect(cx, "/");
             Ok(())
         }
@@ -184,8 +186,9 @@ pub async fn signup(
                 })?;
 
     
+    log::error!("[Signup - {}] auth.login_user: {}", log_uuid.clone(), user.id.to_string());
     auth.login_user(user.id);
-    auth.remember_user(remember.is_some());
+    // auth.remember_user(remember.is_some());
     // if successful and Some(guest_id) then try to tranfser data over to new user
     // if let Some(guest) = guest_user.as_ref() {
     //     transfer_data_to_user(cx, guest.id).await?            
@@ -202,7 +205,10 @@ pub async fn logout(cx: Scope) -> Result<(), ServerFnError> {
     log::info!("[Logout - {}]", log_uuid);
     let auth = auth(cx)?;
 
+    auth.remember_user(false);
     auth.logout_user();
+    
+    log::error!("[Logout - {}] redirect to login", log_uuid);
     leptos_axum::redirect(cx, "/login");
 
     Ok(())

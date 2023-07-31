@@ -14,7 +14,7 @@ cfg_if! {
 
         pub fn pool(cx: Scope) -> Result<PgPool, ServerFnError> {
             let log_uuid = uuid::Uuid::new_v4();
-            log::info!("[Auth - {}]", log_uuid.clone());
+            log::info!("[Pool - {}]", log_uuid.clone());
         use_context::<PgPool>(cx)
                 .ok_or_else(|| ServerFnError::ServerError("Pool missing.".into()))
         }

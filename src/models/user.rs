@@ -127,7 +127,16 @@ if #[cfg(feature = "ssr")] {
         }
 
         fn is_authenticated(&self) -> bool {
-            true
+            // if no current user then we are not authenticated
+            // if a guest user then we are not authenticated
+            // if a user is logged in then we are authenticated
+            // get the user with the id if get returns anything but result of some user
+            if self.is_guest {
+                return false;
+            } else {
+                // do other checks here
+                return true;
+            }
         }
 
         fn is_active(&self) -> bool {

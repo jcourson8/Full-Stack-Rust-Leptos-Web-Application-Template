@@ -11,3 +11,7 @@ pub struct LoginActionContext(pub Action<Login, Result<(), ServerFnError>>);
 
 #[derive(Copy, Clone)]
 pub struct SignupActionContext(pub Action<Signup, Result<(), ServerFnError>>);
+
+//Resource<(usize, usize, usize), Result<Option<crate::models::user::User>, ServerFnError>>
+#[derive(Copy, Clone)]
+pub struct UserResourceContext(pub Resource<(usize, usize, usize), Result<Option<crate::models::user::User>, ServerFnError>>);

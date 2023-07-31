@@ -1,17 +1,21 @@
 use leptos::*;
+use crate::models::context_structs::UserResourceContext;
 use crate::models::user::User;
 use crate::views ::components::logout_button::LogoutButton;
 use leptos_router::A;
 
+
 #[component]
 pub fn Header(
     cx: Scope, 
-    user: leptos::Resource<(usize, usize, usize), Result<Option<User>, ServerFnError>> , 
+    // user: leptos::Resource<(usize, usize, usize), Result<Option<User>, ServerFnError>> , 
 ) -> impl IntoView {
+
+    let user = use_context::<UserResourceContext>(cx).unwrap().0;
 
     view! { cx, 
         <header class="bg-gray-900 p-4 text-white shadow-md w-full z-50"> //fixed top-0fixed top-0
-            <A href="/" class="text-2xl font-bold"><h1>"Home"</h1></A>
+            <a href="/" class="text-2xl font-bold"><h1>"Home"</h1></a>
             <Transition
                 fallback=move || view! {cx, <span class="text-gray-300">"Loading..."</span>}
             >
